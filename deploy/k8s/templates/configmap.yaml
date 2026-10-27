@@ -1,0 +1,15 @@
+{{- if .Values.env.config}}
+# Harness versions ConfigMaps (name-1, name-2, ...) and updates references,
+# so a config change rolls the pods without a checksum annotation.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Values.name}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{.Values.name}}
+data:
+{{- range $key, $value := .Values.env.config}}
+  {{$key}}: {{$value | quote}}
+{{- end}}
+{{- end}}

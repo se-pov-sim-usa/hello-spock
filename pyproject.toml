@@ -1,0 +1,52 @@
+[project]
+name = "hello-spock"
+version = "0.1.0"
+description = "A Django web app that greets Spock, built as a Continuous Integration showcase."
+requires-python = ">=3.13"
+readme = "README.md"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-exclude = ["staticfiles"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",   # pycodestyle
+  "F",        # pyflakes
+  "I",        # isort
+  "B",        # bugbear
+  "UP",       # pyupgrade
+  "S",        # bandit rules
+  "DJ",       # django
+  "SIM",      # simplify
+  "PT",       # pytest style
+  "RUF",      # ruff-specific
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "hello_spock.settings_test"
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers --cov --cov-report=term-missing"
+testpaths = ["greeting"]
+filterwarnings = [
+  "error",
+  # STATIC_ROOT only exists after collectstatic, which tests don't need.
+  "ignore:No directory at:UserWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["greeting", "hello_spock"]
+omit = ["*/tests/*", "hello_spock/wsgi.py", "hello_spock/asgi.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = false
+
+[tool.bandit]
+exclude_dirs = ["greeting/tests", ".venv"]

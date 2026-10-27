@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.name}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{.Values.name}}
+    app.kubernetes.io/name: {{.Values.name}}
+    app.kubernetes.io/component: web
+spec:
+  {{- if not .Values.autoscaling.enabled}}
+  replicas: {{.Values.replicas}}
+  {{- end}}
+  revisionHistoryLimit: 5
+  # Harness adds its own track/color labels for Canary and Blue Green; keep the selector minimal.
+  selector:
+    matchLabels:
+      app: {{.Values.name}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{.Values.name}}
+        app.kubernetes.io/name: {{.Values.name}}
+        app.kubernetes.io/component: web
+    spec:
+      {{- if .Values.dockercfg}}
+      imagePullSecrets:
+        - name: {{.Values.name}}-dockercfg
+      {{- end}}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: {{.Values.name}}
+          image: {{.Values.image}}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: {{.Values.containerPort}}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: {{.Values.containerPort | quote}}
+          {{- if or .Values.env.config .Values.env.secrets}}
+          envFrom:
+            {{- if .Values.env.config}}
+            - configMapRef:
+                name: {{.Values.name}}
+            {{- end}}
+            {{- if .Values.env.secrets}}
+            - secretRef:
+                name: {{.Values.name}}
+            {{- end}}
+          {{- end}}
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              # Give endpoints time to drop the pod before gunicorn stops accepting.
+              exec:
+                command: ["sleep", "5"]
+          resources:
+            requests:
+              cpu: {{.Values.resources.requests.cpu}}
+              memory: {{.Values.resources.requests.memory}}
+            limits:
+              memory: {{.Values.resources.limits.memory}}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi

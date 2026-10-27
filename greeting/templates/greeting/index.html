@@ -1,0 +1,55 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A warm, logical greeting for Commander Spock.">
+  <meta name="theme-color" content="#05060f">
+  <title>Hello, {{ name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Space+Grotesk:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{% static 'greeting/css/style.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖖</text></svg>">
+</head>
+<body>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="nebula nebula--one" aria-hidden="true"></div>
+  <div class="nebula nebula--two" aria-hidden="true"></div>
+
+  <main class="stage">
+    <section class="card" aria-labelledby="greeting">
+      <div class="lcars" aria-hidden="true">
+        <span class="lcars__cap"></span>
+        <span class="lcars__bar lcars__bar--orange"></span>
+        <span class="lcars__bar lcars__bar--lavender"></span>
+        <span class="lcars__bar lcars__bar--peach"></span>
+        <span class="lcars__label">Stardate {% now "Y.z" %}</span>
+      </div>
+
+      <div class="salute" role="img" aria-label="Vulcan salute">🖖</div>
+
+      <h1 id="greeting" class="headline">
+        <span class="headline__hello">Hello,</span>
+        <span class="headline__name">{{ name }}</span>
+      </h1>
+
+      <p class="tagline">Live long and prosper.</p>
+
+      <ul class="readouts" aria-label="Ship status">
+        <li><span class="readouts__key">Logic</span><span class="readouts__value">100%</span></li>
+        <li><span class="readouts__key">Emotion</span><span class="readouts__value">suppressed</span></li>
+        <li><span class="readouts__key">Pipeline</span><span class="readouts__value readouts__value--ok">green</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>USS Continuous Integration</span>
+    <span class="footer__dot" aria-hidden="true">•</span>
+    <span>{{ app_version }} @ <code title="{{ git_sha }}">{{ git_sha_short }}</code></span>
+  </footer>
+
+  <script src="{% static 'greeting/js/stars.js' %}" defer></script>
+</body>
+</html>

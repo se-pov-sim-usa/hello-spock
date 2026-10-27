@@ -1,0 +1,17 @@
+# Dev environment override: single replica, verbose logs, no disruption budget.
+replicas: 1
+
+env:
+  config:
+    LOG_LEVEL: debug
+    GUNICORN_WORKERS: "1"
+
+pdb:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 96Mi
+  limits:
+    memory: 192Mi

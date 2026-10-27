@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Tooling output
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+junit.xml
+htmlcov/
+.rendered/
+
+# Django
+staticfiles/
+
+# Local config
+.env
+.DS_Store
+.idea/
+.vscode/

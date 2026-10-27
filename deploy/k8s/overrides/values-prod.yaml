@@ -1,0 +1,32 @@
+# Prod environment override: autoscaling, ingress with TLS, strict hosts.
+# Replace the hostname with the real one before the first prod deployment.
+replicas: 3
+
+env:
+  config:
+    DJANGO_ALLOWED_HOSTS: hello-spock.example.com
+    DJANGO_CSRF_TRUSTED_ORIGINS: https://hello-spock.example.com
+    GUNICORN_WORKERS: "3"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: hello-spock.example.com
+  tlsSecretName: hello-spock-tls
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  minAvailable: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 192Mi
+  limits:
+    memory: 384Mi

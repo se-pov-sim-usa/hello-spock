@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.name}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{.Values.name}}
+  {{- if .Values.blueGreen.enabled}}
+  annotations:
+    harness.io/primary-service: "true"
+  {{- end}}
+spec:
+  type: {{.Values.service.type}}
+  selector:
+    app: {{.Values.name}}
+  ports:
+    - name: http
+      port: {{.Values.service.port}}
+      targetPort: http
+      protocol: TCP
+{{- if .Values.blueGreen.enabled}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.name}}-stage
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{.Values.name}}
+  annotations:
+    harness.io/stage-service: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: {{.Values.name}}
+  ports:
+    - name: http
+      port: {{.Values.service.port}}
+      targetPort: http
+      protocol: TCP
+{{- end}}
