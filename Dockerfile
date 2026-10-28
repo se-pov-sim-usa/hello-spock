@@ -8,11 +8,12 @@ FROM python:3.13-slim AS builder
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:${PATH}"
+# The venv gets no pip of its own: the builder's pip installs into it, so pip
+# (and the dependencies it vendors) never reaches the runtime image.
+RUN python -m venv --without-pip /opt/venv
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
+RUN pip --python /opt/venv/bin/python install -r /tmp/requirements.txt
 
 # ---- Runtime stage: minimal image, non-root user, read-only friendly ----
 FROM python:3.13-slim AS runtime
@@ -33,7 +34,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     GIT_SHA=${GIT_SHA} \
     PORT=8000
 
-RUN groupadd --system --gid 10001 app \
+# Nothing installs packages at runtime, so drop the base image's pip as attack surface.
+RUN python -m pip uninstall --yes pip \
+    && groupadd --system --gid 10001 app \
     && useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
 
 WORKDIR /app
