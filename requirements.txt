@@ -1,4 +1,4 @@
 # Runtime dependencies (installed into the container image). Kept current by Dependabot.
-Django==5.2.18
+Django==5.2.19
 gunicorn==26.2.0
 whitenoise==6.12.0
