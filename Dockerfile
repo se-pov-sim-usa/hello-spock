@@ -3,7 +3,7 @@
 # Base image tags are literal (not ARGs) so Dependabot can track and bump them.
 
 # ---- Build stage: resolve and install dependencies into an isolated venv ----
-FROM python:3.13-slim AS builder
+FROM python:3.15-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -16,7 +16,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip --python /opt/venv/bin/python install -r /tmp/requirements.txt
 
 # ---- Runtime stage: minimal image, non-root user, read-only friendly ----
-FROM python:3.13-slim AS runtime
+FROM python:3.15-slim AS runtime
 
 ARG APP_VERSION=dev
 ARG GIT_SHA=local
